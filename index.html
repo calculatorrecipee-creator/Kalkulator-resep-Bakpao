@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalkulator Scaling Resep & HPP Bakpao Pro</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              200: '#fed7aa',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c',
+              800: '#9a3412'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+        BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      opacity: 1;
+    }
+
+    .tab-active {
+      background: #ea580c;
+      color: white;
+      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.22);
+    }
+
+    .tab-inactive {
+      color: #64748b;
+    }
+
+    .tab-inactive:hover {
+      background: #fff7ed;
+      color: #c2410c;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .number-input {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-slate-50 text-slate-800">
+
+  <!-- =========================================================
+       PASSWORD GATE
+       ========================================================= -->
+  <div id="passwordGate"
+       class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/95 px-4">
+
+    <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl sm:p-8">
+
+      <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-100 text-3xl">
+        🥟
+      </div>
+
+      <div class="text-center">
+        <h1 class="text-2xl font-black text-slate-900">
+          Bakpao Pro
+        </h1>
+
+        <p class="mt-2 text-sm leading-6 text-slate-500">
+          Kalkulator Scaling Resep & HPP
+        </p>
+      </div>
+
+      <form id="passwordForm" class="mt-7">
+        <label for="passwordInput"
+               class="mb-2 block text-sm font-semibold text-slate-700">
+          Password Akses
+        </label>
+
+        <div class="relative">
+          <input
+            id="passwordInput"
+            type="password"
+            autocomplete="current-password"
+            placeholder="Masukkan password"
+            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 pr-12 outline-none transition focus:border-orange-500 focus:bg-white focus:ring-4 focus:ring-orange-100"
+          >
+
+          <button
+            type="button"
+            id="togglePassword"
+            class="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+            aria-label="Tampilkan password">
+            👁️
+          </button>
+        </div>
+
+        <p id="passwordError"
+           class="mt-2 hidden text-sm font-medium text-red-600">
+          Password salah. Silakan coba lagi.
+        </p>
+
+        <button
+          type="submit"
+          class="mt-5 w-full rounded-xl bg-orange-600 px-4 py-3.5 font-bold text-white shadow-lg shadow-orange-600/20 transition hover:bg-orange-700 active:scale-[0.99]">
+          🔓 Buka Aplikasi
+        </button>
+      </form>
+
+      <p class="mt-6 text-center text-xs text-slate-400">
+        Data aplikasi tersimpan secara lokal di browser.
+      </p>
+    </div>
+  </div>
+
+
+  <!-- =========================================================
+       MAIN APPLICATION
+       ========================================================= -->
+  <div id="app" class="hidden">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <div class="mx-auto max-w-6xl px-4 py-4 sm:px-6">
+
+        <div class="flex items-center justify-between gap-4">
+
+          <div class="flex min-w-0 items-center gap-3">
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-2xl">
+              🥟
+            </div>
+
+            <div class="min-w-0">
+              <h1 class="truncate text-lg font-black text-slate-900 sm:text-xl">
+                Bakpao Pro
+              </h1>
+              <p class="truncate text-xs text-slate-500 sm:text-sm">
+                Scaling Resep & HPP
+              </p>
+            </div>
+          </div>
+
+          <button
+            id="lockButton"
+            class="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 sm:px-4 sm:text-sm">
+            🔒 Kunci
+          </button>
+
+        </div>
+
+      </div>
+    </header>
+
+
+    <!-- Main -->
+    <main class="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8">
+
+      <!-- =====================================================
+           TARGET PCS QUICK CONTROL
+           ===================================================== -->
+      <section class="mb-5 rounded-2xl border border-orange-100 bg-gradient-to-br from-orange-50 to-white p-4 shadow-sm sm:p-6">
+
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+          <div>
+            <p class="text-xs font-bold uppercase tracking-wider text-orange-600">
+              Target Produksi
+            </p>
+
+            <h2 class="mt-1 text-xl font-black text-slate-900">
+              Berapa pcs bakpao?
+            </h2>
+
+            <p class="mt-1 text-sm text-slate-500">
+              Semua kebutuhan bahan akan dihitung otomatis.
+            </p>
+          </div>
+
+          <div class="w-full sm:w-64">
+            <div class="relative">
+              <input
+                id="targetPcsTop"
+                type="number"
+                min="1"
+                step="1"
+                value="25"
+                class="number-input w-full rounded-xl border-2 border-orange-200 bg-white px-4 py-3 pr-16 text-right text-xl font-black text-slate-900 outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+              >
+
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
+                pcs
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+
+      <!-- =====================================================
+           TABS
+           ===================================================== -->
+      <nav class="mb-5 grid grid-cols-3 gap-1 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm">
+
+        <button
+          class="tab-button tab-active rounded-xl px-2 py-3 text-xs font-bold transition sm:text-sm"
+          data-tab="database">
+          💰
+          <span class="mt-1 block">Harga Bahan</span>
+        </button>
+
+        <button
+          class="tab-button tab-inactive rounded-xl px-2 py-3 text-xs font-bold transition sm:text-sm"
+          data-tab="scaling">
+          ⚖️
+          <span class="mt-1 block">Scaling Resep</span>
+        </button>
+
+        <button
+          class="tab-button tab-inactive rounded-xl px-2 py-3 text-xs font-bold transition sm:text-sm"
+          data-tab="hpp">
+          🛒
+          <span class="mt-1 block">Shopping & HPP</span>
+        </button>
+
+      </nav>
+
+
+      <!-- =====================================================
+           TAB 1: DATABASE HARGA
+           ===================================================== -->
+      <section id="tab-database" class="tab-content fade-in">
+
+        <div class="mb-5">
+          <h2 class="text-xl font-black text-slate-900">
+            Database Harga Bahan
+          </h2>
+
+          <p class="mt-1 text-sm text-slate-500">
+            Masukkan harga beli aktual. Data tersimpan otomatis di browser.
+          </p>
+        </div>
+
+
+        <div class="grid gap-4 md:grid-cols-2">
+
+          <!-- Terigu -->
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h3 class="font-bold text-slate-900">🌾 Terigu</h3>
+                <p class="mt-1 text-xs text-slate-500">Harga per kilogram</p>
+              </div>
+
+              <span class="rounded-lg bg-orange-50 px-2.5 py-1 text-xs font-bold text-orange-700">
+                Rp / Kg
+              </span>
+            </div>
+
+            <div class="relative mt-4">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">
+                Rp
+              </span>
+
+              <input
+                id="priceFlour"
+                type="number"
+                min="0"
+                step="100"
+                placeholder="Contoh: 14000"
+                class="number-input w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 font-bold outline-none focus:border-orange-500 focus:bg-white focus:ring-4 focus:ring-orange-100"
+              >
+            </div>
+          </div>
+
+
+          <!-- Super GS -->
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h3 class="font-bold text-slate-900">🧪 Super GS</h3>
+                <p class="mt-1 text-xs text-slate-500">Harga per sachet 11 gram</p>
+              </div>
+
+              <span class="rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700">
+                Rp / Sachet
+              </span>
+            </div>
+
+            <div class="relative mt-4">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">
+                Rp
+              </span>
+
+              <input
+                id="priceYeast"
+                type="number"
+                min="0"
+                step="100"
+                placeholder="Contoh: 2500"
+                class="number-input w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 font-bold outline-none focus:border-orange-500 focus:bg-white focus:ring-4 focus:ring-orange-100"
+              >
+            </div>
+          </div>
+
+
+          <!-- Gula -->
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h3 class="font-bold text-slate-900">🍚 Gula Halus</h3>
+                <p class="mt-1 text-xs text-slate-500">Harga per kilogram</p>
+              </div>
+
+              <span class="rounded-lg bg-pink-50 px-2.5 py-1 text-xs font-bold text-pink-700">
+                Rp / Kg
+              </span>
+            </div>
+
+            <div class="relative mt-4">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">
+                Rp
+              </span>
+
+              <input
+                id="priceSugar"
+                type="number"
+                min="0"
+                step="100"
+                placeholder="Contoh: 18000"
+                class="number-input w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 font-bold outline-none focus:border-orange-500 focus:bg-white focus:ring-4 focus:ring-orange-100"
+              >
+            </div>
+          </div>
+
+
+          <!-- Mentega -->
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h3 class="font-bold text-slate-900">🧈 Mentega Putih</h3>
+                <p class="mt-1 text-xs text-slate-500">Harga per kilogram</p>
+              </div>
+
+              <span class="rounded-lg bg-yellow-50 px-2.5 py-1 text-xs font-bold text-yellow-700">
+                Rp / Kg
+              </span>
+            </div>
+
+            <div class="relative mt-4">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">
+                Rp
+              </span>
+
+              <input
+                id="priceButter"
+                type="number"
+                min="0"
+                step="100"
+                placeholder="Contoh: 22000"
+                class="number-input w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 font-bold outline-none focus:border-orange-500 focus:bg-white focus:ring-4 focus:ring-orange-100"
+              >
+            </div>
+          </div>
+
+
+          <!-- Air -->
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:col-span-2">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h3 class="font-bold text-slate-900">💧 Air</h3>
+                <p class="mt-1 text-xs text-slate-500">Harga per liter</p>
+              </div>
+
+              <span class="rounded-lg bg-cyan-50 px-2.5 py-1 text-xs font-bold text-cyan-700">
+                Rp / Liter
+              </span>
+            </div>
+
+            <div class="relative mt-4">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">
+                Rp
+              </span>
+
+              <input
+                id="priceWater"
+                type="number"
+                min="0"
+                step="100"
+                placeholder="Contoh: 5000"
+                class="number-input w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 font-bold outline-none focus:border-orange-500 focus:bg-white focus:ring-4 focus:ring-orange-100"
+              >
+            </div>
+          </div>
+
+        </div>
+
+
+        <div class="mt-5 flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p class="font-bold text-amber-900">
+              💡 Data harga tersimpan otomatis
+            </p>
+
+            <p class="mt-1 text-xs leading-5 text-amber-700">
+              Perubahan harga akan langsung memengaruhi perhitungan HPP.
+            </p>
+          </div>
+
+          <button
+            id="clearPrices"
+            class="rounded-xl border border-amber-300 bg-white px-4 py-2.5 text-sm font-bold text-amber-800 transition hover:bg-amber-100">
+            Reset Harga
+          </button>
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           TAB 2: SCALING RESEP
+           ===================================================== -->
+      <section id="tab-scaling" class="tab-content hidden fade-in">
+
+        <div class="mb-5">
+          <h2 class="text-xl font-black text-slate-900">
+            Scaling Resep
+          </h2>
+
+          <p class="mt-1 text-sm text-slate-500">
+            Resep otomatis dikalikan berdasarkan target produksi.
+          </p>
+        </div>
+
+
+        <div class="mb-5 grid gap-4 sm:grid-cols-3">
+
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-400">
+              Base Recipe
+            </p>
+
+            <p class="mt-2 text-2xl font-black text-slate-900">
+              25 <span class="text-sm font-bold text-slate-400">pcs</span>
+            </p>
+          </div>
+
+          <div class="rounded-2xl border border-orange-200 bg-orange-50 p-5 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-wide text-orange-600">
+              Target
+            </p>
+
+            <p id="scalingTargetDisplay"
+               class="mt-2 text-2xl font-black text-orange-700">
+              25 <span class="text-sm font-bold">pcs</span>
+            </p>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-400">
+              Faktor Scaling
+            </p>
+
+            <p id="scaleFactorDisplay"
+               class="mt-2 text-2xl font-black text-slate-900">
+              1×
+            </p>
+          </div>
+
+        </div>
+
+
+        <!-- Recipe table -->
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+          <div class="border-b border-slate-100 px-5 py-4">
+            <h3 class="font-bold text-slate-900">
+              Formula Resep
+            </h3>
+
+            <p class="mt-1 text-xs text-slate-500">
+              Base: 25 pcs bakpao dari 1 kg terigu
+            </p>
+          </div>
+
+
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[600px]">
+              <thead class="bg-slate-50">
+                <tr>
+                  <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                    Bahan
+                  </th>
+
+                  <th class="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">
+                    Base 25 Pcs
+                  </th>
+
+                  <th class="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-orange-600">
+                    Target
+                  </th>
+
+                  <th class="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">
+                    Satuan
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody id="recipeTableBody" class="divide-y divide-slate-100">
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+
+        <div class="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-4">
+          <p class="text-sm font-bold text-blue-900">
+            ℹ️ Catatan Scaling
+          </p>
+
+          <p class="mt-1 text-xs leading-5 text-blue-700">
+            Perhitungan menggunakan faktor
+            <strong>Target Pcs ÷ 25</strong>.
+            Nilai resep dihitung secara presisi tanpa pembulatan otomatis.
+          </p>
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           TAB 3: SHOPPING LIST & HPP
+           ===================================================== -->
+      <section id="tab-hpp" class="tab-content hidden fade-in">
+
+        <div class="mb-5">
+          <h2 class="text-xl font-black text-slate-900">
+            Auto Shopping List & HPP
+          </h2>
+
+          <p class="mt-1 text-sm text-slate-500">
+            Estimasi kebutuhan bahan dan biaya produksi berdasarkan target.
+          </p>
+        </div>
+
+
+        <!-- KPI -->
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-400">
+              Target Produksi
+            </p>
+
+            <p id="kpiTarget"
+               class="mt-2 text-3xl font-black text-slate-900">
+              25 pcs
+            </p>
+          </div>
+
+          <div class="rounded-2xl border border-orange-200 bg-orange-50 p-5 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-wide text-orange-600">
+              Total Food Cost
+            </p>
+
+            <p id="kpiFoodCost"
+               class="mt-2 text-2xl font-black text-orange-700">
+              Rp 0
+            </p>
+          </div>
+
+          <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm sm:col-span-2 lg:col-span-1">
+            <p class="text-xs font-bold uppercase tracking-wide text-emerald-600">
+              HPP / Pcs
+            </p>
+
+            <p id="kpiHpp"
+               class="mt-2 text-2xl font-black text-emerald-700">
+              Rp 0
+            </p>
+          </div>
+
+        </div>
+
+
+        <!-- Shopping list -->
+        <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+          <div class="border-b border-slate-100 px-5 py-4">
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h3 class="font-bold text-slate-900">
+                  🛒 Shopping List
+                </h3>
+
+                <p class="mt-1 text-xs text-slate-500">
+                  Kebutuhan bahan untuk target produksi
+                </p>
+              </div>
+
+              <span id="shoppingTargetBadge"
+                    class="w-fit rounded-full bg-orange-100 px-3 py-1 text-xs font-bold text-orange-700">
+                25 pcs
+              </span>
+            </div>
+          </div>
+
+
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[650px]">
+              <thead class="bg-slate-50">
+                <tr>
+                  <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                    Bahan
+                  </th>
+
+                  <th class="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">
+                    Kebutuhan
+                  </th>
+
+                  <th class="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">
+                    Harga Acuan
+                  </th>
+
+                  <th class="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">
+                    Est. Cost
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody id="shoppingTableBody" class="divide-y divide-slate-100">
+              </tbody>
+
+              <tfoot class="bg-slate-50">
+                <tr>
+                  <td colspan="3"
+                      class="px-5 py-4 text-right text-sm font-black text-slate-700">
+                    TOTAL FOOD COST
+                  </td>
+
+                  <td id="tableFoodCost"
+                      class="px-5 py-4 text-right text-lg font-black text-orange-700">
+                    Rp 0
+                  </td>
+                </tr>
+              </tfoot>
+
+            </table>
+          </div>
+
+        </div>
+
+
+        <!-- Margin -->
+        <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+
+          <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+
+            <div class="lg:max-w-md">
+              <h3 class="font-black text-slate-900">
+                🎯 Target Margin Profit
+              </h3>
+
+              <p class="mt-1 text-sm leading-6 text-slate-500">
+                Tentukan margin keuntungan yang diinginkan untuk mendapatkan rekomendasi harga jual.
+              </p>
+            </div>
+
+
+            <div class="w-full lg:max-w-lg">
+
+              <div class="flex items-center gap-4">
+                <input
+                  id="marginSlider"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="1"
+                  value="30"
+                  class="h-2 w-full cursor-pointer accent-orange-600"
+                >
+
+                <div class="flex w-24 shrink-0 items-center rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                  <input
+                    id="marginInput"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="1"
+                    value="30"
+                    class="number-input w-full bg-transparent text-right font-black outline-none"
+                  >
+
+                  <span class="ml-1 font-black text-slate-500">%</span>
+                </div>
+              </div>
+
+              <div class="mt-5 rounded-2xl bg-slate-900 p-5 text-white">
+
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Rekomendasi Harga Jual / Pcs
+                </p>
+
+                <p id="recommendedPrice"
+                   class="mt-2 text-3xl font-black">
+                  Rp 0
+                </p>
+
+                <p id="profitPerPiece"
+                   class="mt-2 text-xs text-slate-400">
+                  Estimasi profit: Rp 0 / pcs
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- Warning if prices empty -->
+        <div id="priceWarning"
+             class="mt-5 hidden rounded-2xl border border-red-200 bg-red-50 p-4">
+
+          <p class="font-bold text-red-900">
+            ⚠️ Harga bahan belum lengkap
+          </p>
+
+          <p class="mt-1 text-sm leading-6 text-red-700">
+            Silakan isi semua harga bahan pada tab
+            <strong>Harga Bahan</strong>
+            agar Food Cost dan HPP dapat dihitung dengan akurat.
+          </p>
+
+          <button
+            id="goToDatabase"
+            class="mt-3 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-red-700">
+            Isi Harga Bahan
+          </button>
+
+        </div>
+
+      </section>
+
+    </main>
+
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 bg-white">
+      <div class="mx-auto max-w-6xl px-4 py-6 text-center sm:px-6">
+        <p class="text-xs font-semibold text-slate-400">
+          Bakpao Pro • Kalkulator Scaling Resep & HPP
+        </p>
+
+        <p class="mt-1 text-xs text-slate-400">
+          Base recipe: 25 pcs / 1 Kg Terigu
+        </p>
+      </div>
+    </footer>
+
+  </div>
+
+
+  <!-- =========================================================
+       JAVASCRIPT
+       ========================================================= -->
+  <script>
+
+    /* =========================================================
+       CONFIGURATION
+       ========================================================= */
+
+    const PASSWORD = "BAKPAOPRO2026";
+
+    const BASE_PCS = 25;
+
+    const STORAGE_KEY = "bakpaoProData_v1";
+
+    const BASE_RECIPE = [
+      {
+        id: "flour",
+        name: "Terigu",
+        icon: "🌾",
+        amount: 1000,
+        unit: "gram",
+        priceUnit: "kg"
+      },
+      {
+        id: "yeast",
+        name: "Super GS (Ragi/Pengembang)",
+        icon: "🧪",
+        amount: 1,
+        unit: "sachet",
+        priceUnit: "sachet"
+      },
+      {
+        id: "sugar",
+        name: "Gula Halus",
+        icon: "🍚",
+        amount: 100,
+        unit: "gram",
+        priceUnit: "kg"
+      },
+      {
+        id: "butter",
+        name: "Mentega Putih",
+        icon: "🧈",
+        amount: 100,
+        unit: "gram",
+        priceUnit: "kg"
+      },
+      {
+        id: "water",
+        name: "Air",
+        icon: "💧",
+        amount: 500,
+        unit: "ml",
+        priceUnit: "liter"
+      }
+    ];
+
+
+    /* =========================================================
+       STATE
+       ========================================================= */
+
+    let state = {
+      targetPcs: 25,
+      margin: 30,
+      prices: {
+        flour: "",
+        yeast: "",
+        sugar: "",
+        butter: "",
+        water: ""
+      }
+    };
+
+
+    /* =========================================================
+       DOM HELPERS
+       ========================================================= */
+
+    const $ = (id) => document.getElementById(id);
+
+
+    /* =========================================================
+       LOCAL STORAGE
+       ========================================================= */
+
+    function loadState() {
+
+      try {
+
+        const saved = localStorage.getItem(STORAGE_KEY);
+
+        if (saved) {
+          const parsed = JSON.parse(saved);
+
+          state = {
+            ...state,
+            ...parsed,
+            prices: {
+              ...state.prices,
+              ...(parsed.prices || {})
+            }
+          };
+        }
+
+      } catch (error) {
+
+        console.warn("Tidak dapat membaca localStorage:", error);
+
+      }
+
+    }
+
+
+    function saveState() {
+
+      try {
+
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(state)
+        );
+
+      } catch (error) {
+
+        console.warn("Tidak dapat menyimpan state:", error);
+
+      }
+
+    }
+
+
+    /* =========================================================
+       PASSWORD GATE
+       ========================================================= */
+
+    function isUnlocked() {
+      return sessionStorage.getItem("bakpaoProUnlocked") === "true";
+    }
+
+
+    function unlockApp() {
+
+      sessionStorage.setItem(
+        "bakpaoProUnlocked",
+        "true"
+      );
+
+      $("passwordGate").classList.add("hidden");
+      $("app").classList.remove("hidden");
+
+      renderAll();
+
+    }
+
+
+    function lockApp() {
+
+      sessionStorage.removeItem("bakpaoProUnlocked");
+
+      $("app").classList.add("hidden");
+      $("passwordGate").classList.remove("hidden");
+
+      $("passwordInput").value = "";
+      $("passwordInput").focus();
+
+    }
+
+
+    $("passwordForm").addEventListener("submit", function(event) {
+
+      event.preventDefault();
+
+      const enteredPassword = $("passwordInput").value;
+
+      if (enteredPassword === PASSWORD) {
+
+        $("passwordError").classList.add("hidden");
+
+        unlockApp();
+
+      } else {
+
+        $("passwordError").classList.remove("hidden");
+
+        $("passwordInput").classList.add(
+          "border-red-400",
+          "ring-4",
+          "ring-red-100"
+        );
+
+        setTimeout(() => {
+
+          $("passwordInput").classList.remove(
+            "border-red-400",
+            "ring-4",
+            "ring-red-100"
+          );
+
+        }, 1000);
+
+      }
+
+    });
+
+
+    $("togglePassword").addEventListener("click", function() {
+
+      const input = $("passwordInput");
+
+      if (input.type === "password") {
+
+        input.type = "text";
+        this.textContent = "🙈";
+
+      } else {
+
+        input.type = "password";
+        this.textContent = "👁️";
+
+      }
+
+    });
+
+
+    $("lockButton").addEventListener("click", lockApp);
+
+
+    /* =========================================================
+       FORMATTERS
+       ========================================================= */
+
+    function formatRupiah(value, decimals = 0) {
+
+      if (!Number.isFinite(value)) {
+        value = 0;
+      }
+
+      return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      }).format(value);
+
+    }
+
+
+    function formatNumber(value, maxDecimals = 4) {
+
+      if (!Number.isFinite(value)) {
+        return "0";
+      }
+
+      return new Intl.NumberFormat("id-ID", {
+        maximumFractionDigits: maxDecimals
+      }).format(value);
+
+    }
+
+
+    function formatUnitAmount(value, unit) {
+
+      if (unit === "gram") {
+        return `${formatNumber(value)} g`;
+      }
+
+      if (unit === "ml") {
+        return `${formatNumber(value)} ml`;
+      }
+
+      if (unit === "sachet") {
+        return `${formatNumber(value)} sachet`;
+      }
+
+      return `${formatNumber(value)} ${unit}`;
+
+    }
+
+
+    /* =========================================================
+       TARGET PCS
+       ========================================================= */
+
+    function getTargetPcs() {
+
+      let target = Number(state.targetPcs);
+
+      if (!Number.isFinite(target) || target < 1) {
+        target = BASE_PCS;
+      }
+
+      return Math.floor(target);
+
+    }
+
+
+    function setTargetPcs(value) {
+
+      let target = Number(value);
+
+      if (!Number.isFinite(target) || target < 1) {
+        target = BASE_PCS;
+      }
+
+      target = Math.floor(target);
+
+      state.targetPcs = target;
+
+      $("targetPcsTop").value = target;
+
+      saveState();
+
+      renderAll();
+
+    }
+
+
+    $("targetPcsTop").addEventListener("input", function() {
+
+      let value = Number(this.value);
+
+      if (Number.isFinite(value) && value >= 1) {
+
+        state.targetPcs = Math.floor(value);
+
+        saveState();
+
+        renderAll();
+
+      }
+
+    });
+
+
+    $("targetPcsTop").addEventListener("change", function() {
+
+      setTargetPcs(this.value);
+
+    });
+
+
+    /* =========================================================
+       RECIPE CALCULATION
+       ========================================================= */
+
+    function getScaleFactor() {
+
+      return getTargetPcs() / BASE_PCS;
+
+    }
+
+
+    function getScaledRecipe() {
+
+      const factor = getScaleFactor();
+
+      return BASE_RECIPE.map(item => ({
+        ...item,
+        scaledAmount: item.amount * factor
+      }));
+
+    }
+
+
+    /* =========================================================
+       PRICE DATABASE
+       ========================================================= */
+
+    const priceInputMap = {
+      flour: "priceFlour",
+      yeast: "priceYeast",
+      sugar: "priceSugar",
+      butter: "priceButter",
+      water: "priceWater"
+    };
+
+
+    Object.entries(priceInputMap).forEach(([key, inputId]) => {
+
+      $(inputId).addEventListener("input", function() {
+
+        state.prices[key] = this.value;
+
+        saveState();
+
+        renderHPP();
+
+      });
+
+    });
+
+
+    $("clearPrices").addEventListener("click", function() {
+
+      const confirmed = confirm(
+        "Reset semua harga bahan menjadi kosong?"
+      );
+
+      if (!confirmed) return;
+
+      state.prices = {
+        flour: "",
+        yeast: "",
+        sugar: "",
+        butter: "",
+        water: ""
+      };
+
+      saveState();
+
+      loadPriceInputs();
+
+      renderHPP();
+
+    });
+
+
+    function loadPriceInputs() {
+
+      Object.entries(priceInputMap).forEach(([key, inputId]) => {
+
+        $(inputId).value =
+          state.prices[key] ?? "";
+
+      });
+
+    }
+
+
+    /* =========================================================
+       COST CALCULATION
+       ========================================================= */
+
+    function getPrice(key) {
+
+      const value = Number(state.prices[key]);
+
+      return Number.isFinite(value) && value >= 0
+        ? value
+        : 0;
+
+    }
+
+
+    function getIngredientCost(item) {
+
+      const amount = item.scaledAmount;
+
+      const price = getPrice(item.id);
+
+      if (item.id === "flour") {
+
+        // 1000 gram = 1 kg
+        return (amount / 1000) * price;
+
+      }
+
+      if (item.id === "sugar") {
+
+        // 1000 gram = 1 kg
+        return (amount / 1000) * price;
+
+      }
+
+      if (item.id === "butter") {
+
+        // 1000 gram = 1 kg
+        return (amount / 1000) * price;
+
+      }
+
+      if (item.id === "water") {
+
+        // 1000 ml = 1 liter
+        return (amount / 1000) * price;
+
+      }
+
+      if (item.id === "yeast") {
+
+        // 1 unit = 1 sachet
+        return amount * price;
+
+      }
+
+      return 0;
+
+    }
+
+
+    function getTotalFoodCost() {
+
+      return getScaledRecipe().reduce(
+        (total, item) =>
+          total + getIngredientCost(item),
+        0
+      );
+
+    }
+
+
+    function getHPPPerPiece() {
+
+      const target = getTargetPcs();
+
+      if (target <= 0) return 0;
+
+      return getTotalFoodCost() / target;
+
+    }
+
+
+    function hasCompletePrices() {
+
+      return BASE_RECIPE.every(item => {
+
+        const price = Number(state.prices[item.id]);
+
+        return Number.isFinite(price) && price > 0;
+
+      });
+
+    }
+
+
+    /* =========================================================
+       RECIPE TABLE RENDER
+       ========================================================= */
+
+    function renderRecipeTable() {
+
+      const target = getTargetPcs();
+      const factor = getScaleFactor();
+
+      $("scalingTargetDisplay").innerHTML =
+        `${formatNumber(target)} <span class="text-sm font-bold">pcs</span>`;
+
+      $("scaleFactorDisplay").textContent =
+        `${formatNumber(factor, 4)}×`;
+
+
+      $("recipeTableBody").innerHTML =
+        getScaledRecipe().map(item => {
+
+          return `
+            <tr class="hover:bg-slate-50">
+
+              <td class="px-5 py-4">
+                <div class="flex items-center gap-3">
+                  <span class="text-xl">${item.icon}</span>
+
+                  <div>
+                    <p class="font-bold text-slate-800">
+                      ${item.name}
+                    </p>
+
+                    <p class="mt-0.5 text-xs text-slate-400">
+                      Resep dasar
+                    </p>
+                  </div>
+                </div>
+              </td>
+
+              <td class="px-5 py-4 text-right font-semibold text-slate-600">
+                ${formatUnitAmount(item.amount, item.unit)}
+              </td>
+
+              <td class="px-5 py-4 text-right">
+                <span class="font-black text-orange-700">
+                  ${formatUnitAmount(item.scaledAmount, item.unit)}
+                </span>
+              </td>
+
+              <td class="px-5 py-4 text-right text-sm font-semibold text-slate-400">
+                ${item.unit}
+              </td>
+
+            </tr>
+          `;
+
+        }).join("");
+
+    }
+
+
+    /* =========================================================
+       SHOPPING LIST RENDER
+       ========================================================= */
+
+    function getPriceLabel(item) {
+
+      const price = getPrice(item.id);
+
+      if (item.id === "yeast") {
+        return `${formatRupiah(price)} / sachet`;
+      }
+
+      if (item.id === "water") {
+        return `${formatRupiah(price)} / L`;
+      }
+
+      return `${formatRupiah(price)} / kg`;
+
+    }
+
+
+    function renderShoppingList() {
+
+      const target = getTargetPcs();
+
+      $("shoppingTargetBadge").textContent =
+        `${formatNumber(target)} pcs`;
+
+
+      $("shoppingTableBody").innerHTML =
+        getScaledRecipe().map(item => {
+
+          const cost = getIngredientCost(item);
+
+          return `
+            <tr class="hover:bg-slate-50">
+
+              <td class="px-5 py-4">
+                <div class="flex items-center gap-3">
+                  <span class="text-xl">${item.icon}</span>
+
+                  <span class="font-bold text-slate-800">
+                    ${item.name}
+                  </span>
+                </div>
+              </td>
+
+              <td class="px-5 py-4 text-right font-bold text-slate-700">
+                ${formatUnitAmount(item.scaledAmount, item.unit)}
+              </td>
+
+              <td class="px-5 py-4 text-right text-sm font-semibold text-slate-500">
+                ${getPriceLabel(item)}
+              </td>
+
+              <td class="px-5 py-4 text-right font-black text-slate-800">
+                ${formatRupiah(cost)}
+              </td>
+
+            </tr>
+          `;
+
+        }).join("");
+
+    }
+
+
+    /* =========================================================
+       HPP RENDER
+       ========================================================= */
+
+    function renderHPP() {
+
+      const target = getTargetPcs();
+      const foodCost = getTotalFoodCost();
+      const hpp = getHPPPerPiece();
+
+      $("kpiTarget").textContent =
+        `${formatNumber(target)} pcs`;
+
+      $("kpiFoodCost").textContent =
+        formatRupiah(foodCost);
+
+      $("kpiHpp").textContent =
+        formatRupiah(hpp);
+
+      $("tableFoodCost").textContent =
+        formatRupiah(foodCost);
+
+
+      const margin = Math.max(
+        0,
+        Math.min(
+          100,
+          Number(state.margin) || 0
+        )
+      );
+
+
+      /*
+       * Margin definition:
+       *
+       * Harga Jual = HPP / (1 - Margin%)
+       *
+       * Contoh:
+       * HPP = Rp 10.000
+       * Margin = 30%
+       * Harga Jual = 10.000 / 0.70
+       *             = Rp 14.286
+       *
+       * Dengan demikian profit = 30% dari harga jual.
+       */
+
+      let recommendedPrice = 0;
+
+      if (hpp > 0 && margin < 100) {
+
+        recommendedPrice =
+          hpp / (1 - margin / 100);
+
+      }
+
+
+      const profitPerPiece =
+        Math.max(
+          0,
+          recommendedPrice - hpp
+        );
+
+
+      $("marginSlider").value = margin;
+      $("marginInput").value = margin;
+
+      $("recommendedPrice").textContent =
+        formatRupiah(recommendedPrice);
+
+      $("profitPerPiece").textContent =
+        `Estimasi profit: ${formatRupiah(profitPerPiece)} / pcs`;
+
+
+      if (hasCompletePrices()) {
+
+        $("priceWarning").classList.add("hidden");
+
+      } else {
+
+        $("priceWarning").classList.remove("hidden");
+
+      }
+
+    }
+
+
+    /* =========================================================
+       MARGIN CONTROLS
+       ========================================================= */
+
+    $("marginSlider").addEventListener("input", function() {
+
+      let value = Number(this.value);
+
+      if (!Number.isFinite(value)) {
+        value = 30;
+      }
+
+      value = Math.max(
+        0,
+        Math.min(100, value)
+      );
+
+      state.margin = value;
+
+      $("marginInput").value = value;
+
+      saveState();
+
+      renderHPP();
+
+    });
+
+
+    $("marginInput").addEventListener("input", function() {
+
+      let value = Number(this.value);
+
+      if (!Number.isFinite(value)) {
+        return;
+      }
+
+      value = Math.max(
+        0,
+        Math.min(100, value)
+      );
+
+      state.margin = value;
+
+      $("marginSlider").value = value;
+
+      saveState();
+
+      renderHPP();
+
+    });
+
+
+    $("marginInput").addEventListener("change", function() {
+
+      let value = Number(this.value);
+
+      if (!Number.isFinite(value)) {
+        value = 30;
+      }
+
+      value = Math.max(
+        0,
+        Math.min(100, value)
+      );
+
+      state.margin = value;
+
+      this.value = value;
+      $("marginSlider").value = value;
+
+      saveState();
+
+      renderHPP();
+
+    });
+
+
+    /* =========================================================
+       TABS
+       ========================================================= */
+
+    const tabButtons =
+      document.querySelectorAll(".tab-button");
+
+    const tabContents =
+      document.querySelectorAll(".tab-content");
+
+
+    function switchTab(tabName) {
+
+      tabButtons.forEach(button => {
+
+        const isActive =
+          button.dataset.tab === tabName;
+
+        if (isActive) {
+
+          button.classList.remove(
+            "tab-inactive"
+          );
+
+          button.classList.add(
+            "tab-active"
+          );
+
+        } else {
+
+          button.classList.remove(
+            "tab-active"
+          );
+
+          button.classList.add(
+            "tab-inactive"
+          );
+
+        }
+
+      });
+
+
+      tabContents.forEach(content => {
+
+        if (content.id === `tab-${tabName}`) {
+
+          content.classList.remove("hidden");
+
+        } else {
+
+          content.classList.add("hidden");
+
+        }
+
+      });
+
+
+      if (tabName === "hpp") {
+        renderHPP();
+      }
+
+    }
+
+
+    tabButtons.forEach(button => {
+
+      button.addEventListener("click", () => {
+
+        switchTab(button.dataset.tab);
+
+      });
+
+    });
+
+
+    $("goToDatabase").addEventListener("click", function() {
+
+      switchTab("database");
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+
+    });
+
+
+    /* =========================================================
+       RENDER ALL
+       ========================================================= */
+
+    function renderAll() {
+
+      const target = getTargetPcs();
+
+      $("targetPcsTop").value = target;
+
+      renderRecipeTable();
+
+      renderShoppingList();
+
+      renderHPP();
+
+    }
+
+
+    /* =========================================================
+       INITIALIZATION
+       ========================================================= */
+
+    function init() {
+
+      loadState();
+
+      loadPriceInputs();
+
+      $("marginSlider").value =
+        state.margin ?? 30;
+
+      $("marginInput").value =
+        state.margin ?? 30;
+
+      $("targetPcsTop").value =
+        getTargetPcs();
+
+
+      if (isUnlocked()) {
+
+        $("passwordGate").classList.add("hidden");
+        $("app").classList.remove("hidden");
+
+        renderAll();
+
+      } else {
+
+        $("passwordGate").classList.remove("hidden");
+        $("app").classList.add("hidden");
+
+        setTimeout(() => {
+          $("passwordInput").focus();
+        }, 100);
+
+      }
+
+    }
+
+
+    init();
+
+  </script>
+
+</body>
+</html>
